@@ -28,7 +28,7 @@ namespace ProductManger.Api.Controllers
         [HttpPut("{id}")] // Update Feature
         public IActionResult Put(int id, UpdateFeatureDto dto)
         {
-            var updateFeature = _service.UpdatFeature(id, dto.Title, dto.Description, dto.Priority, dto.IsCompleted);
+            var updateFeature = _service.UpdateFeature(id, dto.Title, dto.Description, dto.Priority, dto.IsCompleted);
             if(!updateFeature)
                 return NotFound("Feature not found");
             return Ok("Feature updated");
