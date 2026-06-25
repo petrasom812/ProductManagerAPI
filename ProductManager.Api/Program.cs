@@ -1,11 +1,15 @@
 using ProductManger.Api.Services;
+using Microsoft.EntityFrameworkCore;
+using ProductManger.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<ServiceFeatures>();
+builder.Services.AddScoped<ServiceFeatures>();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=app.db"));
 
 var app = builder.Build();
 

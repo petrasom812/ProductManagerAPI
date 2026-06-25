@@ -1,34 +1,58 @@
+using Microsoft.EntityFrameworkCore;
 using ProductManger.Api.Models;
+using ProductManger.Api.Data;
+using ProductManger.Api.Dtos;
 
 namespace ProductManger.Api.Services
 {
     public class ServiceFeatures
     {
-        private List<FeatureModel> features = new();
+        private readonly AppDbContext _context;
+
+        public ServiceFeatures(AppDbContext context)
+        {
+            _context = context;
+        }
 
         // View all features
-        public List<FeatureModel> GetFeatures()
+        public async Task<List<FeatureDto>> GetFeatures()
         {
-            return features.ToList();
+            var features = await _context.Features.ToListAsync();
+
+            return features.Select(f => new FeatureDto
+            {
+                Id = f.Id,
+                Title = f.Title,
+                Description = f.Description,
+                Priority = f.Priority,
+                IsCompleted = f.IsCompleted
+            }).ToList();
         }
         // Create a feature
-        public FeatureModel AddFeature(string title, string description, string priority)
+        public async Task<FeatureDto> AddFeature(string title, string description, string priority)
         {
             var feature = new FeatureModel
             {
-                Id = features.Count + 1,
                 Title = title,
                 Description = description,
                 Priority = priority,
                 IsCompleted = false
             };
-            features.Add(feature);
-            return feature;
+            _context.Features.Add(feature);
+            await _context.SaveChangesAsync();
+            return new FeatureDto
+            {
+                Id = feature.Id,
+                Title = feature.Title,
+                Description = feature.Description,
+                Priority = feature.Priority,
+                IsCompleted = feature.IsCompleted
+            };
         }
         // Update feature details and completion status
-        public bool UpdateFeature(int id, string title, string description, string priority, bool isComleted) 
+        public async Task<bool> UpdateFeature(int id, string title, string description, string priority, bool isComleted) 
         {
-            var feature = features.FirstOrDefault(f => f.Id == id);
+            var feature = await _context.Features.FirstOrDefaultAsync(f => f.Id == id);
             
             if(feature == null)
                 return false;
@@ -36,15 +60,18 @@ namespace ProductManger.Api.Services
             feature.Description = description;
             feature.Priority = priority;
             feature.IsCompleted = isComleted;
+
+            await _context.SaveChangesAsync();
             return true;
         }
         // Delete feature
-        public bool DeleteFeature(int id)
+        public async Task<bool> DeleteFeature(int id)
         {
-            var feature = features.FirstOrDefault(f => f.Id == id);
+            var feature = await _context.Features.FirstOrDefaultAsync(f => f.Id == id);
             if(feature == null)
                 return false;
-            features.Remove(feature);
+            _context.Features.Remove(feature);
+            await _context.SaveChangesAsync();
             return true;
         }
     }
