@@ -1,42 +1,42 @@
 using Microsoft.AspNetCore.Mvc;
-using ProductManger.Api.Services;
 using ProductManger.Api.Dtos;
+using ProductManager.Api.Interface;
 
 namespace ProductManger.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductMangerController : ControllerBase
+    public class ProductManagerController : ControllerBase
     {
-        private readonly ServiceFeatures _service;
-        public ProductMangerController(ServiceFeatures service)
+        private readonly IServiceFeatures _service;
+        public ProductManagerController(IServiceFeatures service)
         {
             _service = service;
         }
         [HttpGet] //View all data
         public async Task<ActionResult<List<FeatureDto>>> Get()
         {
-            var getFeature = _service.GetFeatures();
+            var getFeature = await _service.GetFeaturesAsync();
             return Ok(getFeature);
         }
         [HttpPost] //Add Feature
         public async Task<ActionResult<FeatureDto>> Post(CreateFeatureDto dto)
         {
-            var addFeature = await _service.AddFeature(dto.Title, dto.Description, dto.Priority);
-            return CreatedAtAction(nameof(Post), new { id = addFeature.Id }, addFeature);
+            var addFeature = await _service.AddFeatureAsync(dto.Title, dto.Description, dto.Priority);
+            return Ok(addFeature);
         }
         [HttpPut("{id}")] // Update Feature
         public async Task<IActionResult> Put(int id, UpdateFeatureDto dto)
         {
-            var updateFeature = await _service.UpdateFeature(id, dto.Title, dto.Description, dto.Priority, dto.IsCompleted);
+            var updateFeature = await _service.UpdateFeatureAsync(id, dto.Title, dto.Description, dto.Priority, dto.IsCompleted);
             if (!updateFeature)
                 return NotFound("Feature not found");
-            return Ok("Feature updated");
+            return Ok(updateFeature);
         }
         [HttpDelete("{id}")] // Delete Feature
         public async Task<IActionResult> Delete(int id)
         {
-            var deleteFeature = await _service.DeleteFeature(id);
+            var deleteFeature = await _service.DeleteFeatureAsync(id);
             if (!deleteFeature)
                 return NotFound("Feature not found");
             return NoContent();
